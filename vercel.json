@@ -1,0 +1,7 @@
+{
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "functions": {
+    "api/chat.ts": { "maxDuration": 45 }
+  }
+}

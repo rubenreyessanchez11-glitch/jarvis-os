@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jarvis</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+<style>
+:root{--bg:#07101f;--panel:#182844;--glass:rgba(24,40,68,.62);--line:rgba(255,255,255,.10);--ink:#fff;--mute:#9db0cf;--acc:#45d5ff;--acc-ink:#07101f;--warm:#ffb347;--me:rgba(69,213,255,.14);--r:20px;--s2:8px;--s3:16px;--s4:24px;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#eef2f8;--panel:#fff;--glass:rgba(255,255,255,.7);--line:rgba(7,16,31,.12);--ink:#07101f;--mute:#4b5d7a;--acc:#0a7fa6;--acc-ink:#fff;--warm:#b36b00;--me:rgba(10,127,166,.12);color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 480px at 50% -8%,rgba(69,213,255,.13),transparent 62%) fixed,var(--bg);color:var(--ink);font:400 16px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 112px}
+h1,h2,.big{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,system-ui,sans-serif;margin:0;letter-spacing:-.02em;font-weight:600}
+h2{font-size:22px;font-weight:700;margin-bottom:10px}
+.hero{display:flex;flex-wrap:wrap;gap:28px;align-items:center;justify-content:center;padding:12px 0 28px}
+.reactor{width:190px;height:190px;flex:none}
+.reactor .r1{transform-origin:100px 100px}
+@media (prefers-reduced-motion:no-preference){
+ .r1{animation:spin 60s linear infinite}.r2{animation:spin 40s linear infinite reverse;transform-origin:100px 100px}
+ .core{animation:pulse 5s ease-in-out infinite}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.8}}
+.big{font-size:clamp(56px,12vw,88px);font-weight:300;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.hello{font-size:24px;font-weight:600;letter-spacing:-.01em;margin:6px 0 0}
+.date{color:var(--mute);margin:0}
+.grid{display:grid;gap:16px;grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);min-width:0}
+#log{height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 10px}
+.m{max-width:88%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.m.u{align-self:flex-end;background:var(--me)}
+.m.a{align-self:flex-start;border:1px solid var(--line)}
+.m.note{align-self:center;color:var(--mute);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+button{font:500 15px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);padding:8px 14px;cursor:pointer;min-height:40px;transition:background .2s,border-color .2s}
+button:hover{border-color:var(--acc)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+button.go{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:700}
+button:disabled{opacity:.5;cursor:default}
+.bar{display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+ul{list-style:none;margin:12px 0 0;padding:0}
+li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+li span{flex:1;overflow-wrap:anywhere}
+li.d span{text-decoration:line-through;color:var(--mute)}
+li input{width:20px;height:20px;accent-color:var(--acc)}
+.x{border:none;color:var(--mute);min-height:32px;padding:4px 8px}
+.empty{color:var(--mute);margin:12px 0 0}
+.modes{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.qb{padding:10px 0;border-top:1px solid var(--line)}
+.opt{display:block;width:100%;text-align:left;margin-top:6px}
+.opt.ok{border-color:#1f9d6b;background:#1f9d6b33}
+.opt.no{border-color:#d4513a;background:#d4513a33}
+.why{color:var(--mute);margin:6px 0 0;font-size:15px}
+.fc{font-size:64px}
+select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px}
+.wide{grid-column:1/-1}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.chead h2{margin:0}
+.row2{display:flex;gap:6px}
+.cal{display:grid;gap:20px;grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+@media (max-width:760px){.cal{grid-template-columns:1fr}}
+.dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow span{text-align:center;color:var(--mute);font-size:14px;padding:4px 0}
+.day{aspect-ratio:1;min-height:44px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;border:1px solid transparent}
+.day.out{opacity:.4}
+.day.today{border-color:var(--warm)}
+.day.sel{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.day i{width:6px;height:6px;border-radius:50%;background:var(--warm);margin-top:3px}
+.day.sel i{background:var(--acc-ink)}
+input[type=time]{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+html{-webkit-text-size-adjust:100%}
+button{touch-action:manipulation}
+@media (pointer:coarse){button,input,select{min-height:44px}}
+.langbar{display:flex;justify-content:flex-end;padding-bottom:4px}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.reactor{filter:drop-shadow(0 0 22px rgba(69,213,255,.28))}
+.pills{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);color:var(--mute);font-size:13px}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--acc)}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:2px;padding:6px;border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:1px solid var(--line)}
+.tabs a{color:var(--mute);text-decoration:none;font-size:14px;font-weight:500;padding:10px 14px;border-radius:999px;min-height:44px;display:flex;align-items:center}
+.tabs a:hover,.tabs a:focus-visible{color:var(--ink);background:rgba(255,255,255,.08)}
+@media (max-width:420px){.tabs a{padding:10px 9px;font-size:13px}}
+</style>
+</head>
+<body>
+<main>
+<div class="langbar"><select id="lg" aria-label="Language"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option></select></div>
+<section class="hero" id="home">
+  <svg class="reactor" viewBox="0 0 200 200" role="img" aria-label="Animated arc reactor">
+    <circle cx="100" cy="100" r="92" fill="none" stroke="var(--line)" stroke-width="2"/>
+    <g class="r1"><circle cx="100" cy="100" r="82" fill="none" stroke="var(--acc)" stroke-width="5" stroke-dasharray="40 14 8 14"/></g>
+    <g class="r2"><circle cx="100" cy="100" r="62" fill="none" stroke="var(--warm)" stroke-width="4" stroke-dasharray="90 20"/></g>
+    <circle cx="100" cy="100" r="40" fill="none" stroke="var(--acc)" stroke-width="2"/>
+    <circle class="core" cx="100" cy="100" r="24" fill="var(--acc)"/>
+    <circle cx="100" cy="100" r="10" fill="var(--panel)"/>
+  </svg>
+  <div>
+    <div class="big" id="time">--:--</div>
+    <p class="hello" id="hello">Hello, boss.</p>
+    <p class="date" id="date"></p>
+    <div class="pills"><span class="pill"><i></i>Claude</span><span class="pill"><i></i><b id="stS">Device only</b></span></div>
+  </div>
+</section>
+
+<div class="grid">
+<section class="card" id="chat" aria-label="Assistant">
+  <h2>Ask Jarvis</h2>
+  <div class="modes" id="modes" role="group" aria-label="Mode"><button class="on">Coder</button><button>Tutor</button><button>Planner</button></div>
+  <div class="chips" id="chips">
+    <button>What’s on my calendar this week?</button>
+    <button>Plan my day in 5 steps</button>
+    <button>Quiz me in French</button>
+    <button>Explain async/await simply</button>
+    <button>Pitch my smart glasses idea</button>
+  </div>
+  <div id="log" role="log" aria-live="polite"></div>
+  <div class="bar">
+    <input type="text" id="q" placeholder="Type or speak. English o español." aria-label="Message">
+    <button id="mic" hidden aria-label="Dictate">Mic</button>
+    <button class="go" id="send">Send</button>
+  </div>
+</section>
+
+<section class="card" id="missions" aria-label="Tasks">
+  <h2>Missions</h2>
+  <div class="bar"><input type="text" id="ti" placeholder="Add a mission" aria-label="New mission"><button class="go" id="ta">Add</button></div>
+  <ul id="tl"></ul>
+</section>
+
+<section class="card wide" id="calendar" aria-label="Calendar">
+  <div class="chead"><h2 id="cm">Calendar</h2><div class="row2"><button id="cp" aria-label="Previous month">‹</button><button id="ct">Today</button><button id="cn" aria-label="Next month">›</button></div></div>
+  <div class="cal">
+    <div>
+      <div class="dow" aria-hidden="true"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+      <div class="days" id="cg"></div>
+    </div>
+    <div>
+      <h2 id="cd" style="font-size:18px"></h2>
+      <div class="bar"><input type="text" id="ce" placeholder="Add an event" aria-label="Event"><input type="time" id="cth" aria-label="Time"><button class="go" id="cb">Add</button></div>
+      <ul id="cl"></ul>
+      <p class="empty" id="cs"></p>
+      <p class="empty" id="cy"></p>
+    </div>
+  </div>
+</section>
+
+<section class="card" id="learn" aria-label="Language lab">
+  <h2>Language lab</h2>
+  <div class="bar"><select id="ll" aria-label="Language"><option>French</option><option>English</option></select><button class="go" id="lb">New quiz</button><span id="ls" style="align-self:center;color:var(--mute)"></span></div>
+  <div id="lq"><p class="empty">Pick a language and get a fresh 3-question quiz every time.</p></div>
+</section>
+
+<section class="card" id="focus" aria-label="Focus timer">
+  <h2>Focus</h2>
+  <div class="big fc" id="fc" role="timer">25:00</div>
+  <div class="chips" id="fm"><button data-m="25" class="on">25 min</button><button data-m="50">50 min</button><button data-m="5">Break</button></div>
+  <div class="bar"><button class="go" id="fg">Start</button><button id="fr">Reset</button></div>
+</section>
+</div>
+</main>
+<nav class="tabs" aria-label="Sections"><a href="#home">Home</a><a href="#chat">Chat</a><a href="#calendar">Calendar</a><a href="#learn">Learn</a><a href="#focus">Focus</a></nav>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function tick(){var n=new Date(),h=n.getHours();
+ $("time").textContent=n.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+ $("date").textContent=n.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+ $("hello").textContent=(h<12?"Good morning":h<19?"Good afternoon":"Good evening")+", boss."}
+tick();setInterval(tick,15000);
+
+/* missions */
+var K="jarvis-hud-v1",T=[];
+try{T=JSON.parse(localStorage.getItem(K))||[]}catch(e){T=[]}
+function save(){try{localStorage.setItem(K,JSON.stringify(T))}catch(e){}}
+function mk(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function draw(){var u=$("tl");u.textContent="";
+ if(!T.length){u.appendChild(mk("p","empty","No missions yet. Add the first one."));return}
+ T.forEach(function(t,i){var li=mk("li",t.d?"d":""),c=mk("input");c.type="checkbox";c.checked=t.d;
+  c.setAttribute("aria-label","Done: "+t.t);c.onchange=function(){t.d=c.checked;save();draw()};
+  var x=mk("button","x","Remove");x.setAttribute("aria-label","Remove "+t.t);x.onclick=function(){T.splice(i,1);save();draw()};
+  li.appendChild(c);li.appendChild(mk("span","",t.t));li.appendChild(x);u.appendChild(li)})}
+function add(){var v=$("ti").value.trim();if(!v)return;T.push({t:v,d:false});$("ti").value="";save();draw()}
+$("ta").onclick=add;$("ti").onkeydown=function(e){if(e.key==="Enter")add()};draw();
+
+/* chat */
+var PRE="You are Jarvis, a sharp, warm personal assistant in the style of the Iron Man AI. The user is a young developer who builds web apps and is learning English and French. Reply in the language the user writes in (English or Spanish). Be concise: short paragraphs, no filler. For code, give small working snippets in plain text. Be honest and direct; if something is a bad idea or unsafe, say so briefly and offer a better route.\n\nConversation:";
+var H=[],busy=false,sample=null,log=$("log");
+function bub(c,x){var b=mk("div","m "+c,x);log.appendChild(b);log.scrollTop=log.scrollHeight;return b}
+bub("note","Yes boss. Ask me anything, or tap a quick action.");
+function lock(v){busy=v;$("send").disabled=v;$("q").disabled=v}
+async function ask(text){
+ text=(text||"").trim();if(!text||busy)return;
+ if(!sample){try{sample=await window.claude.use("sample")}catch(e){sample=null}}
+ if(!sample){bub("note","Chat isn’t available in this view. Open the page from your claude.ai artifact link.");return}
+ $("q").value="";bub("u",text);H.push({role:"user",content:text});lock(true);
+ var out=bub("a","…");
+ var msgs=H.map(function(m,i){return i===0?{role:"user",content:PRE+MODE[mode]+agendaText()+langNote()+"\n\n"+m.content}:m});
+ try{
+  var r=await sample(msgs,{cache:false,onText:function(o){out.textContent=o.text;log.scrollTop=log.scrollHeight}});
+  out.textContent=r.text;H.push({role:"assistant",content:r.text});
+ }catch(e){
+  H.pop();
+  out.className="m note";
+  out.textContent=e&&e.code==="not_granted"?"I need your permission to talk to Claude. Try again and accept the prompt."
+   :e&&e.code==="rate_limited"?"Too many requests. Give it a moment and try again."
+   :"Something went wrong. Try again.";
+ }
+ lock(false);$("q").focus();
+}
+$("send").onclick=function(){ask($("q").value)};
+$("q").onkeydown=function(e){if(e.key==="Enter")ask($("q").value)};
+$("chips").onclick=function(e){var b=e.target.closest("button");if(b)ask(b.textContent)};
+
+/* calendar */
+var E=[],cdoc=null,CK="jarvis-cal-v1",view=new Date(),sel;
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+sel=iso(new Date());view=new Date(view.getFullYear(),view.getMonth(),1);
+function persist(){
+ if(cdoc){cdoc.set({events:E}).catch(function(){$("cs").textContent="Couldn’t sync. Check your connection."})}
+ else{try{localStorage.setItem(CK,JSON.stringify(E))}catch(e){}}}
+function cal(){
+ $("cm").textContent=view.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+ var g=$("cg");g.textContent="";
+ var first=new Date(view.getFullYear(),view.getMonth(),1),start=new Date(first);
+ start.setDate(1-((first.getDay()+6)%7));
+ var today=iso(new Date());
+ for(var i=0;i<42;i++){(function(){
+  var d=new Date(start);d.setDate(start.getDate()+i);var k=iso(d);
+  var b=mk("button","day"+(d.getMonth()!==view.getMonth()?" out":"")+(k===today?" today":"")+(k===sel?" sel":""),String(d.getDate()));
+  b.setAttribute("aria-label",d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"}));
+  if(E.some(function(e){return e.d===k}))b.appendChild(mk("i"));
+  b.onclick=function(){sel=k;if(d.getMonth()!==view.getMonth())view=new Date(d.getFullYear(),d.getMonth(),1);cal()};
+  g.appendChild(b)})()}
+ dayList()}
+function dayList(){
+ var u=$("cl");u.textContent="";
+ $("cd").textContent=new Date(sel+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+ var L=E.filter(function(e){return e.d===sel}).sort(function(a,b){return (a.t||"99").localeCompare(b.t||"99")});
+ $("cs").textContent=L.length?"":"Nothing planned. Add an event above.";
+ L.forEach(function(e){var li=mk("li");li.appendChild(mk("span","",(e.t?e.t+"  ":"")+e.x));
+  var x=mk("button","x","Remove");x.setAttribute("aria-label","Remove "+e.x);
+  x.onclick=function(){E=E.filter(function(y){return y.id!==e.id});persist();cal()};
+  li.appendChild(x);u.appendChild(li)})}
+function addEv(){var v=$("ce").value.trim();if(!v)return;
+ E.push({id:"e"+Date.now(),d:sel,t:$("cth").value||"",x:v});$("ce").value="";$("cth").value="";persist();cal()}
+$("cb").onclick=addEv;$("ce").onkeydown=function(e){if(e.key==="Enter")addEv()};
+$("cp").onclick=function(){view=new Date(view.getFullYear(),view.getMonth()-1,1);cal()};
+$("cn").onclick=function(){view=new Date(view.getFullYear(),view.getMonth()+1,1);cal()};
+$("ct").onclick=function(){var n=new Date();sel=iso(n);view=new Date(n.getFullYear(),n.getMonth(),1);cal()};
+function agendaText(){
+ var n=new Date(),end=new Date();end.setDate(n.getDate()+14);var a=iso(n),b=iso(end);
+ var L=E.filter(function(e){return e.d>=a&&e.d<=b}).sort(function(x,y){return (x.d+(x.t||"")).localeCompare(y.d+(y.t||""))});
+ return "\n\nToday is "+n.toDateString()+". The user’s calendar for the next 14 days:\n"+(L.length?L.map(function(e){return "- "+e.d+(e.t?" "+e.t:"")+": "+e.x}).join("\n"):"(no events)")+"\nUse it when the user asks about their schedule. Only the events listed here are known."}
+try{E=JSON.parse(localStorage.getItem(CK))||[]}catch(e){E=[]}
+$("cy").textContent="Saved on this device only.";$("stS").textContent="Device only";
+cal();
+(async function(){
+ try{
+  var us=await window.claude.use("user"),db=await window.claude.use("db");
+  if(!us||!db)return;
+  var id=await us.id();if(!id)return;
+  cdoc=db.doc("data/users/"+id+"/cal");
+  var seeded=false;
+  cdoc.onSnapshot(function(s){
+   var data=s.exists?s.data():null;
+   if(data&&Array.isArray(data.events)){E=data.events}
+   else if(!seeded&&!s.metadata.fromCache){seeded=true;if(E.length)cdoc.set({events:E}).catch(function(){})}
+   $("cy").textContent="Synced to your Claude account.";$("stS").textContent="Synced";
+   cal()},function(){$("cy").textContent="Saved on this device only.";$("stS").textContent="Device only"});
+ }catch(e){}
+})();
+
+/* language */
+var D=[
+['Good morning, boss.','Buenos días, jefe.','Bonjour, patron.'],['Good afternoon, boss.','Buenas tardes, jefe.','Bon après-midi, patron.'],['Good evening, boss.','Buenas noches, jefe.','Bonsoir, patron.'],['Hello, boss.','Hola, jefe.','Salut, patron.'],
+['Ask Jarvis','Pregúntale a Jarvis','Demande à Jarvis'],
+['Type or speak. English o español.','Escribe o habla. Español, English o français.','Écris ou parle. Français, English ou español.'],
+['Send','Enviar','Envoyer'],['Mic','Micrófono','Micro'],['Stop','Detener','Arrêter'],
+['Missions','Misiones','Missions'],['Add a mission','Agrega una misión','Ajoute une mission'],['Add','Agregar','Ajouter'],['No missions yet. Add the first one.','Aún no hay misiones. Agrega la primera.','Pas encore de missions. Ajoute la première.'],['Remove','Quitar','Retirer'],
+['Language lab','Laboratorio de idiomas','Labo de langues'],['New quiz','Nuevo quiz','Nouveau quiz'],['French','Francés','Français'],['English','Inglés','Anglais'],
+['Pick a language and get a fresh 3-question quiz every time.','Elige un idioma y recibe un quiz nuevo de 3 preguntas cada vez.','Choisis une langue et reçois un nouveau quiz de 3 questions à chaque fois.'],
+['Preparing your quiz…','Preparando tu quiz…','Préparation de ton quiz…'],['Couldn’t build the quiz. Try again.','No pude crear el quiz. Intenta de nuevo.','Impossible de créer le quiz. Réessaie.'],
+['Focus','Enfoque','Concentration'],['Break','Descanso','Repos'],['Start','Iniciar','Démarrer'],['Pause','Pausa','Pause'],['Reset','Reiniciar','Réinitialiser'],
+['Session complete, boss. Take a break.','Sesión terminada, jefe. Toma un descanso.','Session terminée, patron. Fais une pause.'],
+['Calendar','Calendario','Calendrier'],['Today','Hoy','Aujourd’hui'],['Add an event','Agrega un evento','Ajoute un événement'],
+['Nothing planned. Add an event above.','No hay nada planeado. Agrega un evento arriba.','Rien de prévu. Ajoute un événement ci-dessus.'],
+['Saved on this device only.','Guardado solo en este dispositivo.','Enregistré uniquement sur cet appareil.'],['Synced to your Claude account.','Sincronizado con tu cuenta de Claude.','Synchronisé avec ton compte Claude.'],
+['Couldn’t sync. Check your connection.','No se pudo sincronizar. Revisa tu conexión.','Synchronisation impossible. Vérifie ta connexion.'],
+['What’s on my calendar this week?','¿Qué tengo en mi calendario esta semana?','Qu’est-ce que j’ai dans mon calendrier cette semaine ?'],
+['Plan my day in 5 steps','Planea mi día en 5 pasos','Planifie ma journée en 5 étapes'],['Quiz me in French','Hazme un quiz en francés','Fais-moi un quiz en français'],
+['Explain async/await simply','Explícame async/await de forma simple','Explique async/await simplement'],['Pitch my smart glasses idea','Presenta mi idea de lentes inteligentes','Présente mon idée de lunettes intelligentes'],
+['Yes boss. Ask me anything, or tap a quick action.','Sí, jefe. Pregúntame lo que quieras o toca una acción rápida.','Oui, patron. Demande-moi ce que tu veux ou touche une action rapide.'],
+['I need your permission to talk to Claude. Try again and accept the prompt.','Necesito tu permiso para hablar con Claude. Intenta de nuevo y acepta el aviso.','J’ai besoin de ta permission pour parler à Claude. Réessaie et accepte la demande.'],
+['Too many requests. Give it a moment and try again.','Demasiadas solicitudes. Espera un momento e intenta de nuevo.','Trop de requêtes. Attends un instant et réessaie.'],['Something went wrong. Try again.','Algo salió mal. Intenta de nuevo.','Une erreur s’est produite. Réessaie.'],
+['Mo','Lu','Lu'],['Tu','Ma','Ma'],['We','Mi','Me'],['Th','Ju','Je'],['Fr','Vi','Ve'],['Sa','Sa','Sa'],['Su','Do','Di'],
+['Home','Inicio','Accueil'],['Learn','Aprender','Apprendre'],['Synced','Sincronizado','Synchronisé'],['Device only','Solo dispositivo','Appareil seulement'],['Message','Mensaje','Message'],['Dictate','Dictar','Dicter'],['Event','Evento','Événement'],['Time','Hora','Heure'],['Previous month','Mes anterior','Mois précédent'],['Next month','Mes siguiente','Mois suivant'],['New mission','Nueva misión','Nouvelle mission'],['Language','Idioma','Langue']
+];
+var LANGS={en:'en-US',es:'es-MX',fr:'fr-FR'},LI={en:0,es:1,fr:2},lang='en',LOC='en-US',R={};
+D.forEach(function(r){r.forEach(function(s){R[s]=r})});
+var _dd=Date.prototype.toLocaleDateString,_dt=Date.prototype.toLocaleTimeString;
+Date.prototype.toLocaleDateString=function(l,o){return _dd.call(this,l||LOC,o)};
+Date.prototype.toLocaleTimeString=function(l,o){return _dt.call(this,l||LOC,o)};
+function applyLang(){
+ var i=LI[lang],els=document.body.querySelectorAll('*');
+ document.documentElement.lang=lang;
+ for(var k=0;k<els.length;k++){var el=els[k];
+  if(el.closest('.langbar'))continue;
+  if(!el.children.length){var r=R[el.textContent];if(r&&el.textContent!==r[i])el.textContent=r[i]}
+  ['placeholder','aria-label'].forEach(function(a){var v=el.getAttribute(a);if(v){var q=R[v];if(q&&v!==q[i])el.setAttribute(a,q[i])}})}}
+function langNote(){var n={en:'English',es:'Spanish',fr:'French'}[lang];return '\n\nThe user set the app language to '+n+'. Reply in '+n+' unless the user writes in another language.'}
+function setLang(l){lang=l;LOC=LANGS[l];try{localStorage.setItem('jarvis-lang',l)}catch(e){}$('lg').value=l;applyLang();tick();cal();applyLang()}
+$('lg').onchange=function(){setLang($('lg').value)};
+var busyL=false;
+new MutationObserver(function(){if(busyL)return;busyL=true;applyLang();setTimeout(function(){busyL=false},0)}).observe(document.body,{childList:true,subtree:true,characterData:true});
+var sl=null;try{sl=localStorage.getItem('jarvis-lang')}catch(e){}
+if(!LANGS[sl])sl=(navigator.language||'en').slice(0,2);
+setLang(LANGS[sl]?sl:'en');
+
+/* modes */
+var MODE={Coder:"\n\nMode: coding partner. Give working snippets, explain why, and point out bugs or risks. Never put secret keys in code.",Tutor:"\n\nMode: English and French tutor. Correct mistakes kindly, explain briefly, then ask one follow-up question.",Planner:"\n\nMode: planner. Turn goals into short, concrete steps with times. Ask one question if something is unclear."},mode="Coder";
+$("modes").onclick=function(e){var b=e.target.closest("button");if(!b)return;mode=b.textContent;[].forEach.call($("modes").children,function(x){x.classList.toggle("on",x===b)});bub("note",mode+" mode on.")};
+
+/* language lab */
+var qs=[],score=0;
+async function lab(){
+ var s=sample;if(!s){try{s=sample=await window.claude.use("sample")}catch(e){s=null}}
+ if(!s){$("lq").textContent="The lab isn’t available in this view. Open the page from your claude.ai artifact link.";return}
+ var lang=$("ll").value;$("lb").disabled=true;$("lq").textContent="Preparing your quiz…";$("ls").textContent="";
+ try{
+  qs=await s.json("Create a 3-question multiple-choice quiz to practice "+lang+" for a teenage learner at intermediate level (vocabulary, grammar, or a short sentence). Return ONLY a JSON array of exactly 3 objects with keys q (string), o (array of 4 strings), a (index 0-3 of the correct option), w (one-sentence explanation in English). Vary the topics each time. Seed: "+Date.now(),{cache:false});
+  if(!Array.isArray(qs)||!qs.length)throw 0;
+  score=0;showQ();
+ }catch(e){$("lq").textContent=e&&e.code==="not_granted"?"I need your permission to talk to Claude. Try again and accept the prompt.":"Couldn’t build the quiz. Try again."}
+ $("lb").disabled=false}
+function showQ(){var box=$("lq");box.textContent="";
+ qs.forEach(function(it,i){var d=mk("div","qb");d.appendChild(mk("b","",(i+1)+". "+it.q));var done=false;
+  it.o.forEach(function(t,j){var b=mk("button","opt",t);b.onclick=function(){if(done)return;done=true;
+   if(j===it.a){b.classList.add("ok");score++}else{b.classList.add("no");d.children[1+it.a].classList.add("ok")}
+   d.appendChild(mk("p","why",it.w));$("ls").textContent="Score: "+score+" / "+qs.length};
+   d.appendChild(b)});
+  box.appendChild(d)});
+ $("ls").textContent="Score: 0 / "+qs.length}
+$("lb").onclick=lab;
+
+/* focus timer */
+var fm=25,fl=1500,ft=null,fe=0;
+function ff(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function fd(){$("fc").textContent=ff(fl);document.title=(ft?ff(fl)+" · ":"")+"Jarvis"}
+function fs(){clearInterval(ft);ft=null;$("fg").textContent="Start"}
+$("fg").onclick=function(){if(ft){fl=Math.max(0,Math.round((fe-Date.now())/1000));fs();fd();return}
+ if(fl<=0)fl=fm*60;fe=Date.now()+fl*1000;$("fg").textContent="Pause";
+ ft=setInterval(function(){fl=Math.max(0,Math.round((fe-Date.now())/1000));fd();if(fl<=0){fs();bub("note","Session complete, boss. Take a break.");fd()}},250)};
+$("fr").onclick=function(){fs();fl=fm*60;fd()};
+$("fm").onclick=function(e){var b=e.target.closest("button");if(!b)return;fs();fm=+b.dataset.m;fl=fm*60;[].forEach.call($("fm").children,function(x){x.classList.toggle("on",x===b)});fd()};
+fd();
+
+/* voice */
+(async function(){
+ var d=null;try{d=await window.claude.use("dictation")}catch(e){}
+ if(!d)return;
+ var m=$("mic");m.hidden=false;
+ d.onPartial(function(o){$("q").value=o.text});
+ d.onFinal(function(o){$("q").value=o.text;ask(o.text)});
+ d.onState(function(s){m.dataset.on=s.state==="listening"?"1":"";m.textContent=s.state==="listening"?"Stop":"Mic"});
+ m.onclick=function(){if(m.dataset.on){d.stop()}else{d.start().catch(function(){})}};
+})();
+})();
+</script>
+</body>
+</html>

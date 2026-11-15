@@ -1,0 +1,48 @@
+/* JARVIS OS design tokens: single source of truth.
+   Apple minimalism 70% x Iron Man 30%. Dark is the primary theme. */
+:root {
+  /* Color */
+  --navy: #07101f;          /* Midnight Navy: app background */
+  --surface: #182844;       /* Surface Blue: cards, glass base */
+  --cyan: #45d5ff;          /* Arc Cyan: primary accent, reactor, focus */
+  --gold: #ffb347;          /* Reactor Gold: highlights, warnings, today */
+  --white: #ffffff;         /* Primary text */
+
+  --bg: var(--navy);
+  --glass: rgba(24, 40, 68, 0.62);
+  --line: rgba(255, 255, 255, 0.10);
+  --ink: var(--white);
+  --mute: #9db0cf;
+  --acc: var(--cyan);
+  --acc-ink: var(--navy);
+  --warm: var(--gold);
+
+  /* Space: 4px base scale */
+  --s1: 4px; --s2: 8px; --s3: 16px; --s4: 24px; --s5: 40px; --s6: 64px;
+
+  /* Shape */
+  --r-sm: 12px; --r: 20px; --r-pill: 999px;
+
+  /* Type: SF on Apple devices, Inter elsewhere */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, system-ui, sans-serif;
+
+  /* Glass */
+  --blur: blur(20px) saturate(140%);
+
+  /* Motion: subtle and always optional */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-fast: 160ms; --t: 240ms;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #eef2f8; --glass: rgba(255, 255, 255, 0.7); --line: rgba(7, 16, 31, 0.12);
+  --ink: #07101f; --mute: #4b5d7a; --acc: #0a7fa6; --acc-ink: #fff; --warm: #b36b00;
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
