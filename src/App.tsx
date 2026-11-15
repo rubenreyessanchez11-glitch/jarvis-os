@@ -12,6 +12,7 @@ import MissionList from './components/MissionList';
 import CalendarCard from './components/CalendarCard';
 import LanguageLab from './components/LanguageLab';
 import FocusCard from './components/FocusCard';
+import DeviceBatteryCard from './components/DeviceBatteryCard';
 import Dock from './components/Dock';
 
 function LangBar({ signOut }: { signOut?: boolean }) {
@@ -31,12 +32,24 @@ function SignIn() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [err, setErr] = useState('');
+  const [sending, setSending] = useState(false);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithOtp({
-      email, options: { emailRedirectTo: window.location.origin, shouldCreateUser: false },
-    });
-    if (error) setErr(error.message); else setSent(true);
+    if (sending) return;
+    setSending(true);
+    setErr('');
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email, options: { emailRedirectTo: window.location.origin, shouldCreateUser: false },
+      });
+      if (error?.code === 'over_email_send_rate_limit') setErr(t('emailRateLimit'));
+      else if (error) setErr(error.message);
+      else setSent(true);
+    } catch {
+      setErr(t('errGeneric'));
+    } finally {
+      setSending(false);
+    }
   };
   return (
     <main>
@@ -46,7 +59,7 @@ function SignIn() {
         {!configured ? <p className="empty">{t('setup')}</p> : sent ? <p role="status">{t('check')}</p> : (
           <form className="bar" onSubmit={e => void submit(e)}>
             <input type="email" required value={email} placeholder={t('email')} aria-label={t('email')} onChange={e => setEmail(e.target.value)} />
-            <button className="go" type="submit">{t('magic')}</button>
+            <button className="go" type="submit" disabled={sending}>{t('magic')}</button>
           </form>
         )}
         {err && <p role="alert" className="empty">{err}</p>}
@@ -90,6 +103,7 @@ function Shell({ userId }: { userId: string }) {
           <CalendarCard events={events} add={add} remove={remove} />
           <LanguageLab />
           <FocusCard />
+          <DeviceBatteryCard userId={userId} />
         </div>
       </main>
       <Dock />
