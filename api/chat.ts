@@ -1,7 +1,7 @@
 import type { Request, Response } from './_lib/http';
 import { randomUUID } from 'node:crypto';
-import { requireUser } from './_lib/auth';
-import { buildSystem, callProvider, providerConfigured, route, MODELS, type Msg, type Provider } from './_lib/providers';
+import { requireUser } from './_lib/auth.js';
+import { buildSystem, callProvider, providerConfigured, route, MODELS, type Msg, type Provider } from './_lib/providers.js';
 
 const PROVIDERS: Provider[] = ['claude', 'openai', 'gemini'];
 const UUID = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
