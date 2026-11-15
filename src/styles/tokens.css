@@ -16,6 +16,11 @@
   --acc: var(--cyan);
   --acc-ink: var(--navy);
   --warm: var(--gold);
+  --panel-top: color-mix(in srgb, var(--glass), var(--ink) 3%);
+  --panel-bottom: color-mix(in srgb, var(--glass), var(--bg) 35%);
+  --arc-halo: color-mix(in srgb, var(--acc) 14%, transparent);
+  --arc-edge: color-mix(in srgb, var(--acc) 28%, var(--line));
+  --panel-shadow: 0 16px 40px color-mix(in srgb, var(--navy) 42%, transparent);
 
   /* Space: 4px base scale */
   --s1: 4px; --s2: 8px; --s3: 16px; --s4: 24px; --s5: 40px; --s6: 64px;

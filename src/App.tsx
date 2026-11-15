@@ -70,8 +70,8 @@ function SignIn() {
   return (
     <main>
       <LangBar />
-      <section className="hero"><ReactorCore /><div><h1 className="big small">JARVIS OS</h1></div></section>
-      <GlassCard title="JARVIS OS">
+      <section className="hero hero--sign-in"><ReactorCore /><h1 className="big small">JARVIS OS</h1></section>
+      <GlassCard title={t('signIn')}>
         {!configured ? <p className="empty">{t('setup')}</p> : <>
           {sent ? <p role="status">{t(mode === 'recovery' ? 'passwordResetSent' : 'check')}</p> : (
             <form className="bar" onSubmit={e => void submit(e)}>
@@ -119,9 +119,10 @@ function Shell({ userId, managePassword, passwordSaved, passwordForm }: {
         <LangBar signOut managePassword={managePassword} />
         {passwordForm}
         {passwordSaved && <p role="status">{t('passwordSaved')}</p>}
-        <section className="hero" id="home">
+        <section className="hero hero--dashboard" id="home">
           <ReactorCore />
           <div>
+            <h1 className="hero-brand">JARVIS OS</h1>
             <div className="big">{now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
             <p className="hello">{t(h < 12 ? 'morning' : h < 19 ? 'afternoon' : 'evening')}</p>
             <p className="date">{now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}</p>

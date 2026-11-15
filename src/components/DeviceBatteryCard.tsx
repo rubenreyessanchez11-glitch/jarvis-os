@@ -18,6 +18,7 @@ export default function DeviceBatteryCard({ userId }: { userId: string }) {
   const [name, setName] = useState('');
   const [pairingToken, setPairingToken] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const localLevel = battery?.level;
@@ -83,6 +84,7 @@ export default function DeviceBatteryCard({ userId }: { userId: string }) {
     setError('');
     setPairingToken('');
     setCopied(false);
+    setCopiedUrl(false);
     try {
       const token = fromBrowser ? '' : asHex(crypto.getRandomValues(new Uint8Array(32)));
       const hash = token && asHex(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))));
@@ -132,6 +134,7 @@ export default function DeviceBatteryCard({ userId }: { userId: string }) {
   return <GlassCard id="devices" title={t('batteryDevices')}>
     <p>{battery ? <>{t('batteryThisDevice')} <strong>{percent(battery.level)}</strong> · {t(battery.charging ? 'batteryCharging' : 'batteryDischarging')}</>
       : t('batteryUnavailable')}</p>
+    {devices && !devices.length && <p className="mute">{t('batteryNoPairedDevices')}</p>}
     {devices && <form className="bar" onSubmit={e => { e.preventDefault(); void add(false); }}>
       <input aria-label={t('batteryName')} placeholder={t('batteryName')} value={name}
         onChange={e => setName(e.target.value)} maxLength={60} required />
@@ -145,6 +148,10 @@ export default function DeviceBatteryCard({ userId }: { userId: string }) {
         try { await navigator.clipboard.writeText(pairingToken); setCopied(true); }
         catch { setError('batteryCopyError'); }
       }}>{t(copied ? 'batteryCopied' : 'batteryCopy')}</button>
+      <button type="button" onClick={async () => {
+        try { await navigator.clipboard.writeText(`${window.location.origin}/api/battery`); setCopiedUrl(true); }
+        catch { setError('batteryCopyError'); }
+      }}>{t(copiedUrl ? 'batteryUrlCopied' : 'batteryCopyUrl')}</button>
       <button type="button" onClick={() => setPairingToken('')}>{t('close')}</button>
     </div>}
     {error && <p role="alert" className="empty">{t(error)}</p>}
