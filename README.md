@@ -26,6 +26,12 @@ Commit the source, `package-lock.json`, `.env.example`, and the migration on a f
 
 [GitHub pull requests](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request)
 
+## Sign in without requesting an email each time
+
+While signed in, choose **Set password** and save a password with at least 12 characters. Sign in with your email and password on other devices. If you have never set a password, use an existing valid magic link to sign in once. If you forget your password, use **Forgot password?**. Sign-in links and recovery emails still use the project's email provider.
+
+[Supabase password sign-in](https://supabase.com/docs/guides/auth/passwords)
+
 ## Deploy on Vercel
 1. Connect the private GitHub repository to Vercel. Use the Vite preset and Node.js 24. Deploy the feature branch to Preview first.
 2. Add the variables from `.env.example` under Settings > Environment Variables for Preview. Enter each provider's key as a sensitive variable and select compatible text models for the three model variables. Use a separate Supabase project and provider credentials for Preview when available.
