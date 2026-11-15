@@ -58,7 +58,7 @@ Reconnect after a reload or when the Google authorization expires. Times are sho
 
 ## WhatsApp drafts
 
-Use the **WhatsApp** button in the chat or enter a command such as “Mándale un mensaje a Francisco: Te veo a las 3:30 en Puerta Chica.” Review and edit the draft in JARVIS. Enter the international phone number or select the contact in WhatsApp after opening the draft. Send from WhatsApp. Drafts stay in the current page until you open them in WhatsApp.
+Use the **WhatsApp** button in the chat or enter a command such as “Mándale un mensaje a Francisco: Te veo a las 3:30 en Puerta Chica.” The first time, enter the international phone number and choose **Save contact in this browser**. Later, repeat the saved name in a command or choose it in the draft. Review the draft, select **Open in WhatsApp**, then send from the contact's conversation. Without a number, choose the contact in WhatsApp. Saved names and phone numbers are scoped to your JARVIS account in this browser. Drafts stay in the current page until you open them in WhatsApp.
 
 [WhatsApp click to chat](https://faq.whatsapp.com/5913398998672934)
 

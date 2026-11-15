@@ -19,7 +19,7 @@ function agendaText(events: EventRow[]) {
   return `Today is ${new Date().toDateString()}.\n` + (list.length ? list.map(x => `- ${x.day}${x.time ? ' ' + x.time : ''}: ${x.title}`).join('\n') : '(no events)');
 }
 
-export default function ChatPanel({ events }: { events: EventRow[] }) {
+export default function ChatPanel({ events, userId }: { events: EventRow[]; userId: string }) {
   const { t, lang, locale } = useI18n();
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [provider, setProvider] = useState('auto');
@@ -94,7 +94,7 @@ export default function ChatPanel({ events }: { events: EventRow[] }) {
         {busy && <div className="m a">…</div>}
         {err && <div className="m note" role="alert">{err}</div>}
       </div>
-      {draft && <WhatsAppDraft key={draft.recipient + '\n' + draft.message} draft={draft} close={() => setDraft(undefined)} />}
+      {draft && <WhatsAppDraft key={draft.recipient + '\n' + draft.message} draft={draft} userId={userId} close={() => setDraft(undefined)} />}
       <div className="bar">
         <input type="text" value={text} placeholder={t('placeholder')} aria-label={t('placeholder')}
           onChange={e => setText(e.target.value)} onKeyDown={e => e.key === 'Enter' && void send()} />

@@ -55,7 +55,7 @@ function SignIn() {
   );
 }
 
-function Shell() {
+function Shell({ userId }: { userId: string }) {
   const { t, locale } = useI18n();
   const [now, setNow] = useState(new Date());
   const { events, add, remove } = useEvents();
@@ -85,7 +85,7 @@ function Shell() {
           </div>
         </section>
         <div className="grid">
-          <ChatPanel events={events} />
+          <ChatPanel events={events} userId={userId} />
           <MissionList />
           <CalendarCard events={events} add={add} remove={remove} />
           <LanguageLab />
@@ -117,7 +117,7 @@ export default function App() {
 
   return (
     <LangCtx.Provider value={{ lang, setLang }}>
-      {!ready ? null : session ? <Shell /> : <SignIn />}
+      {!ready ? null : session ? <Shell key={session.user.id} userId={session.user.id} /> : <SignIn />}
     </LangCtx.Provider>
   );
 }
