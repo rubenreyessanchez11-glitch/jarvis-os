@@ -62,6 +62,17 @@ Use the **WhatsApp** button in the chat or enter a command such as “Mándale u
 
 [WhatsApp click to chat](https://faq.whatsapp.com/5913398998672934)
 
+## Device batteries
+
+Run `supabase/migrations/202611140002_device_batteries.sql` once in Supabase SQL Editor before deploying. Open **Device batteries** after signing in.
+
+- **Windows.** Open JARVIS in a browser that exposes battery status. Enter a device name and select **Share this device**. JARVIS reports while the page is open. The timestamp is the last report and may be older when the tab is closed or suspended.
+- **iPhone.** Sign in to JARVIS on the iPhone, enter a name, select **Connect with a shortcut**, and copy the pairing code before closing the form. In Shortcuts, add a battery level action. Add **Get Contents of URL**, enter the JARVIS site URL ending in `/api/battery`, select **POST** and set the request body to **JSON**. Add `token` as Text and paste the pairing code, then add `level` and insert the battery-level variable. Run it once and check JARVIS for the reading. To update automatically, run the shortcut from a Battery Level or Charger automation.
+
+Keep the pairing code in Shortcuts. Removing a device in JARVIS invalidates its code and stops its browser reporting. JARVIS stores the last reading and when it was reported.
+
+[Battery Status API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getBattery) · [Shortcuts automation triggers](https://support.apple.com/guide/shortcuts/apde31e9638b/ios)
+
 ## Structure
 ```
 api/chat.ts            auth check, routing (auto, manual, compare 3), history
