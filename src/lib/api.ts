@@ -11,6 +11,16 @@ export type ChatBody = {
   persist?: boolean;
 };
 
+export async function getConfiguredProviders(): Promise<string[]> {
+  const { data } = await supabase.auth.getSession();
+  const res = await fetch('/api/chat', {
+    headers: { Authorization: `Bearer ${data.session?.access_token ?? ''}` },
+  });
+  if (!res.ok) throw new Error('Provider status unavailable');
+  const { providers } = await res.json();
+  return providers;
+}
+
 // The browser only talks to our own /api route. Provider keys exist only on the server.
 export async function chat(body: ChatBody): Promise<{ results: Result[]; conversationId?: string }> {
   const { data } = await supabase.auth.getSession();

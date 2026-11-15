@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { configured, supabase } from './lib/supabase';
 import { LangCtx, useI18n, type Lang } from './lib/i18n';
 import { useEvents } from './lib/useEvents';
+import { getConfiguredProviders } from './lib/api';
 import ReactorCore from './components/ReactorCore';
 import StatusPill from './components/StatusPill';
 import GlassCard from './components/GlassCard';
@@ -58,6 +59,14 @@ function Shell() {
   const { t, locale } = useI18n();
   const [now, setNow] = useState(new Date());
   const { events, add, remove } = useEvents();
+  const [providers, setProviders] = useState<string[]>();
+  useEffect(() => {
+    let active = true;
+    void getConfiguredProviders().then(configured => {
+      if (active) setProviders(configured);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 15000); return () => clearInterval(id); }, []);
   const h = now.getHours();
   return (
@@ -70,7 +79,9 @@ function Shell() {
             <div className="big">{now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
             <p className="hello">{t(h < 12 ? 'morning' : h < 19 ? 'afternoon' : 'evening')}</p>
             <p className="date">{now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-            <div className="pills"><StatusPill label={t('models')} /><StatusPill label={t('synced')} /></div>
+            <div className="pills">
+              {providers && <StatusPill label={t(`models${providers.length}`)} />}
+            </div>
           </div>
         </section>
         <div className="grid">

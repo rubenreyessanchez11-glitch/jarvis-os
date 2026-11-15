@@ -1,7 +1,7 @@
 import type { Request, Response } from './_lib/http';
 import { randomUUID } from 'node:crypto';
 import { requireUser } from './_lib/auth';
-import { buildSystem, callProvider, route, MODELS, type Msg, type Provider } from './_lib/providers';
+import { buildSystem, callProvider, providerConfigured, route, MODELS, type Msg, type Provider } from './_lib/providers';
 
 const PROVIDERS: Provider[] = ['claude', 'openai', 'gemini'];
 const UUID = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
@@ -15,8 +15,13 @@ function isMessage(value: unknown): value is Msg {
 
 export default async function handler(req: Request, res: Response) {
   res.setHeader('Cache-Control', 'no-store');
+  if (req.method === 'GET') {
+    const session = await requireUser(req, res);
+    if (session) return res.json({ providers: PROVIDERS.filter(providerConfigured) });
+    return;
+  }
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'GET, POST');
     return res.status(405).end();
   }
   if (req.headers['content-type']?.split(';')[0].trim().toLowerCase() !== 'application/json') {
@@ -41,11 +46,16 @@ export default async function handler(req: Request, res: Response) {
     return res.status(400).json({ error: 'Invalid history options' });
   }
 
+  const available = PROVIDERS.filter(providerConfigured);
+  const preferred = mode === 'quiz' ? 'claude' : route(clean[clean.length - 1].content);
+  const selection = available.includes(preferred) ? preferred : available[0];
   const targets: Provider[] =
     provider === 'compare' ? PROVIDERS :
-    provider === 'auto' ? [route(clean[clean.length - 1].content)] :
+    provider === 'auto' && selection ? [selection] :
     PROVIDERS.filter(candidate => candidate === provider);
-  if (!targets.length) return res.status(400).json({ error: 'unknown provider' });
+  if (!targets.length && provider !== 'auto') return res.status(400).json({ error: 'unknown provider' });
+  const activeTargets = targets.filter(providerConfigured);
+  if (!activeTargets.length) return res.status(503).json({ error: 'Provider unavailable' });
 
   if (conversationId) {
     const { data, error } = await db.from('conversations').select('id')
@@ -54,16 +64,19 @@ export default async function handler(req: Request, res: Response) {
     if (!data) return res.status(404).json({ error: 'Conversation unavailable' });
   }
 
-  const { data: allowed, error: quotaError } = await db.rpc('reserve_chat_calls', { calls: targets.length });
+  const { data: allowed, error: quotaError } = await db.rpc('reserve_chat_calls', { calls: activeTargets.length });
   if (quotaError) return res.status(503).json({ error: 'Chat unavailable' });
   if (!allowed) return res.status(429).json({ error: 'Chat limit reached' });
 
   const system = buildSystem(typeof mode === 'string' ? mode : undefined,
     typeof lang === 'string' ? lang : undefined, typeof agenda === 'string' ? agenda : undefined);
-  const settled = await Promise.allSettled(targets.map(p => callProvider(p, clean, system)));
-  const results = settled.map((s, i) => s.status === 'fulfilled'
-    ? { provider: targets[i], model: MODELS[targets[i]], text: s.value }
-    : { provider: targets[i], model: MODELS[targets[i]], error: 'Model request failed' });
+  const settled = await Promise.allSettled(activeTargets.map(p => callProvider(p, clean, system)));
+  const results = targets.map(p => {
+    const result = settled[activeTargets.indexOf(p)];
+    return result?.status === 'fulfilled' && result.value
+      ? { provider: p, model: MODELS[p], text: result.value }
+      : { provider: p, model: MODELS[p], error: 'Model request failed' };
+  });
 
   let convId = conversationId;
   if (persist) {

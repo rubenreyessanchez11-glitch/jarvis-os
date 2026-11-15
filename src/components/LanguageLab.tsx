@@ -19,7 +19,7 @@ export default function LanguageLab() {
     setBusy(true); setMsg(t('preparing')); setQs([]); setPicked({});
     try {
       const j = await chat({
-        provider: 'claude', mode: 'quiz', persist: false,
+        provider: 'auto', mode: 'quiz', persist: false,
         messages: [{ role: 'user', content: `Create a 3-question multiple-choice quiz to practice ${lang} for a teenage learner at intermediate level (vocabulary, grammar, or a short sentence). Return ONLY a JSON array of exactly 3 objects with keys q (string), o (array of 4 strings), a (index 0-3 of the correct option), w (one-sentence explanation in English). Vary the topics each time. Seed: ${Date.now()}` }],
       });
       const parsed: unknown = JSON.parse((j.results[0]?.text || '').replace(/```json|```/g, '').trim());

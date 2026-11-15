@@ -7,6 +7,15 @@ export const MODELS: Record<Provider, string> = {
   gemini: process.env.GEMINI_MODEL || '',
 };
 
+export function providerConfigured(provider: Provider) {
+  const keys = {
+    claude: process.env.ANTHROPIC_API_KEY,
+    openai: process.env.OPENAI_API_KEY,
+    gemini: process.env.GEMINI_API_KEY,
+  };
+  return Boolean(MODELS[provider].trim() && keys[provider]?.trim());
+}
+
 const BASE = 'You are Jarvis, a calm, sharp personal assistant in the style of the Iron Man AI. Be concise and honest. If something is a bad idea or unsafe, say so briefly and offer a better route.';
 const MODES: Record<string, string> = {
   coder: 'Mode: coding partner. Give small working snippets, explain why, and point out bugs or risks. Never put secret keys in code.',

@@ -5,6 +5,7 @@ import { useI18n } from '../lib/i18n';
 import type { EventRow } from '../lib/useEvents';
 import CompareView from './CompareView';
 import GlassCard from './GlassCard';
+import WhatsAppDraft, { parseWhatsAppRequest, type Draft } from './WhatsAppDraft';
 
 type Msg = { role: 'user' | 'assistant'; content: string; by?: string };
 const MODES = ['coder', 'tutor', 'planner'] as const;
@@ -29,6 +30,7 @@ export default function ChatPanel({ events }: { events: EventRow[] }) {
   const [err, setErr] = useState('');
   const [conv, setConv] = useState<string | undefined>();
   const [listening, setListening] = useState(false);
+  const [draft, setDraft] = useState<Draft>();
   const log = useRef<HTMLDivElement>(null);
 
   const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -37,6 +39,12 @@ export default function ChatPanel({ events }: { events: EventRow[] }) {
   const send = async (raw?: string) => {
     const q = (raw ?? text).trim();
     if (!q || busy) return;
+    const whatsapp = parseWhatsAppRequest(q);
+    if (whatsapp) {
+      setDraft(whatsapp);
+      setText('');
+      return;
+    }
     const next: Msg[] = [...msgs, { role: 'user', content: q }];
     setMsgs(next); setText(''); setBusy(true); setErr(''); setCmp(null);
     try {
@@ -86,10 +94,12 @@ export default function ChatPanel({ events }: { events: EventRow[] }) {
         {busy && <div className="m a">…</div>}
         {err && <div className="m note" role="alert">{err}</div>}
       </div>
+      {draft && <WhatsAppDraft key={draft.recipient + '\n' + draft.message} draft={draft} close={() => setDraft(undefined)} />}
       <div className="bar">
         <input type="text" value={text} placeholder={t('placeholder')} aria-label={t('placeholder')}
           onChange={e => setText(e.target.value)} onKeyDown={e => e.key === 'Enter' && void send()} />
         {SR && <button aria-label={t('mic')} onClick={mic} disabled={listening}>{listening ? t('stop') : t('mic')}</button>}
+        <button type="button" onClick={() => setDraft(parseWhatsAppRequest(text.trim()) ?? { recipient: '', message: text })}>WhatsApp</button>
         <button className="go" disabled={busy} onClick={() => void send()}>{t('send')}</button>
       </div>
     </GlassCard>

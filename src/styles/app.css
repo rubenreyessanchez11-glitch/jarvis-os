@@ -76,3 +76,6 @@ li input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{50%{opacity:.8}}
+.wa-draft { display:grid; gap:8px; margin-block:12px; }
+.wa-draft label { display:grid; gap:4px; }
+.wa-draft textarea { resize:vertical; width:100%; }
