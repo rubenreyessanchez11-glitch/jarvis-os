@@ -41,6 +41,8 @@ export function route(text: string): Provider {
   return 'claude';
 }
 
+const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
+
 async function post(url: string, headers: Record<string, string>, body: unknown): Promise<any> {
   const r = await fetch(url, {
     method: 'POST',
@@ -49,6 +51,7 @@ async function post(url: string, headers: Record<string, string>, body: unknown)
     signal: AbortSignal.timeout(25_000),
     redirect: 'error',
   });
+  if (url === OPENAI_CHAT_URL) console.info('OpenAI Chat Completions HTTP status', r.status);
   if (!r.ok) throw new Error(`Provider returned ${r.status}`); // never echo keys or raw bodies
   return r.json();
 }
@@ -64,7 +67,7 @@ export async function callProvider(p: Provider, msgs: Msg[], system: string): Pr
   }
   if (p === 'openai') {
     const key = process.env.OPENAI_API_KEY; if (!key) throw new Error('openai key not configured');
-    const j = await post('https://api.openai.com/v1/chat/completions', { Authorization: `Bearer ${key}` },
+    const j = await post(OPENAI_CHAT_URL, { Authorization: `Bearer ${key}` },
       { model, max_completion_tokens: 2048, store: false, messages: [{ role: 'system', content: system }, ...msgs] });
     return j.choices?.[0]?.message?.content ?? '';
   }
