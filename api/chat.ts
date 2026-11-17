@@ -34,7 +34,7 @@ export default async function handler(req: Request, res: Response) {
   if (typeof req.body !== 'object' || req.body === null || Array.isArray(req.body)) {
     return res.status(400).json({ error: 'Invalid body' });
   }
-  const { provider = 'auto', messages, conversationId, persist = true, mode, lang, agenda } =
+  const { provider = 'auto', messages, conversationId, persist = true, mode, lang, agenda, missions } =
     req.body as Record<string, unknown>;
   if (!Array.isArray(messages) || !messages.length) return res.status(400).json({ error: 'messages required' });
   const recent: unknown[] = messages.slice(-20);
@@ -48,7 +48,7 @@ export default async function handler(req: Request, res: Response) {
 
   const available = PROVIDERS.filter(providerConfigured);
   const preferred = mode === 'quiz' ? 'claude' : route(clean[clean.length - 1].content);
-  const selection = available.includes(preferred) ? preferred : available[0];
+  const selection = available.includes('gemini') ? 'gemini' : available.includes(preferred) ? preferred : available[0];
   const targets: Provider[] =
     provider === 'compare' ? PROVIDERS :
     provider === 'auto' && selection ? [selection] :
@@ -69,7 +69,8 @@ export default async function handler(req: Request, res: Response) {
   if (!allowed) return res.status(429).json({ error: 'Chat limit reached' });
 
   const system = buildSystem(typeof mode === 'string' ? mode : undefined,
-    typeof lang === 'string' ? lang : undefined, typeof agenda === 'string' ? agenda : undefined);
+    typeof lang === 'string' ? lang : undefined, typeof agenda === 'string' ? agenda : undefined,
+    typeof missions === 'string' ? missions : undefined);
   const settled = await Promise.allSettled(activeTargets.map(p => callProvider(p, clean, system)));
   const results = targets.map(p => {
     const result = settled[activeTargets.indexOf(p)];
