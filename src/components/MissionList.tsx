@@ -1,20 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../lib/i18n';
 import GlassCard from './GlassCard';
 
-type Mission = { id: string; title: string; done: boolean };
+export type Mission = { id: string; title: string; done: boolean };
 
-export default function MissionList() {
+export default function MissionList({ items, load }: { items: Mission[]; load: () => Promise<void> }) {
   const { t } = useI18n();
-  const [items, setItems] = useState<Mission[]>([]);
   const [text, setText] = useState('');
-
-  const load = async () => {
-    const { data } = await supabase.from('missions').select('id,title,done').order('created_at');
-    setItems((data as Mission[]) || []);
-  };
-  useEffect(() => { void load(); }, []);
 
   const add = async () => {
     const v = text.trim(); if (!v) return;

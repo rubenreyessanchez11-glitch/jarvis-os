@@ -1,14 +1,15 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { configured, supabase } from './lib/supabase';
 import { LangCtx, useI18n, type Lang } from './lib/i18n';
 import { useEvents } from './lib/useEvents';
 import { getConfiguredProviders } from './lib/api';
+import { iso } from './lib/date';
 import ReactorCore from './components/ReactorCore';
 import StatusPill from './components/StatusPill';
 import GlassCard from './components/GlassCard';
 import ChatPanel from './components/ChatPanel';
-import MissionList from './components/MissionList';
+import MissionList, { type Mission } from './components/MissionList';
 import CalendarCard from './components/CalendarCard';
 import LanguageLab from './components/LanguageLab';
 import FocusCard from './components/FocusCard';
@@ -103,7 +104,14 @@ function Shell({ userId, managePassword, passwordSaved, passwordForm }: {
   const { t, locale } = useI18n();
   const [now, setNow] = useState(new Date());
   const { events, add, remove } = useEvents();
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [planRequests, setPlanRequests] = useState(0);
   const [providers, setProviders] = useState<string[]>();
+  const loadMissions = useCallback(async () => {
+    const { data } = await supabase.from('missions').select('id,title,done').order('created_at');
+    if (data) setMissions(data);
+  }, []);
+  useEffect(() => { void loadMissions(); }, [loadMissions]);
   useEffect(() => {
     let active = true;
     void getConfiguredProviders().then(configured => {
@@ -113,6 +121,12 @@ function Shell({ userId, managePassword, passwordSaved, passwordForm }: {
   }, []);
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 15000); return () => clearInterval(id); }, []);
   const h = now.getHours();
+  const today = iso(now);
+  const time = `${String(h).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const nextEvent = events.find(event => event.day > today ||
+    (event.day === today && (!event.time || event.time.slice(0, 5) >= time)));
+  const pendingMissions = missions.filter(mission => !mission.done);
+  const eventDate = nextEvent && new Date(`${nextEvent.day}T${nextEvent.time || '00:00'}`);
   return (
     <>
       <main>
@@ -121,7 +135,7 @@ function Shell({ userId, managePassword, passwordSaved, passwordForm }: {
         {passwordSaved && <p role="status">{t('passwordSaved')}</p>}
         <section className="hero hero--dashboard" id="home">
           <ReactorCore />
-          <div>
+          <div className="hero-summary">
             <h1 className="hero-brand">JARVIS OS</h1>
             <div className="big">{now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</div>
             <p className="hello">{t(h < 12 ? 'morning' : h < 19 ? 'afternoon' : 'evening')}</p>
@@ -129,11 +143,26 @@ function Shell({ userId, managePassword, passwordSaved, passwordForm }: {
             <div className="pills">
               {providers && <StatusPill label={t(`models${providers.length}`)} />}
             </div>
+            <dl className="arc-brief">
+              <div>
+                <dt>{t('nextEvent')}</dt>
+                <dd>{nextEvent?.title ?? t('noNextEvent')}</dd>
+                {eventDate && <dd className="mute">{eventDate.toLocaleString(locale, {
+                  weekday: 'short', day: 'numeric', month: 'short',
+                  ...(nextEvent?.time && { hour: '2-digit', minute: '2-digit' }),
+                })}</dd>}
+              </div>
+              <div>
+                <dt>{t('nextMission')}</dt>
+                <dd>{pendingMissions[0]?.title ?? t('noPendingMission')}</dd>
+              </div>
+            </dl>
+            <button type="button" className="go" onClick={() => setPlanRequests(count => count + 1)}>{t('planDay')}</button>
           </div>
         </section>
         <div className="grid">
-          <ChatPanel events={events} userId={userId} />
-          <MissionList />
+          <ChatPanel events={events} missions={pendingMissions} planRequests={planRequests} userId={userId} />
+          <MissionList items={missions} load={loadMissions} />
           <CalendarCard events={events} add={add} remove={remove} />
           <LanguageLab />
           <FocusCard />

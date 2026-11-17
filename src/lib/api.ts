@@ -8,6 +8,7 @@ export type ChatBody = {
   mode?: string;
   lang?: string;
   agenda?: string;
+  missions?: string;
   persist?: boolean;
 };
 
